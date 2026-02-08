@@ -17,7 +17,7 @@
 
 body{
     margin:0;
-    height:100vh;
+    min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -28,6 +28,7 @@ body{
 
 .card{
     width:360px;
+    max-width:95%;
     background:var(--card);
     padding:20px;
     border-radius:16px;
@@ -55,28 +56,15 @@ button{
     cursor:pointer;
 }
 
-/* BOTÕES */
 .btn{
     background:linear-gradient(135deg,var(--rosa),var(--rosa-dark));
     color:#000;
 }
 
-.btn-win{
-    background:var(--verde);
-    color:#000;
-}
+.btn-win{background:var(--verde);color:#000}
+.btn-lose{background:var(--vermelho);color:#fff}
+.btn-exit{background:var(--vermelho);color:#fff}
 
-.btn-lose{
-    background:var(--vermelho);
-    color:#fff;
-}
-
-.btn-exit{
-    background:var(--vermelho);
-    color:#fff;
-}
-
-/* RGB */
 .rgb{
     background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,magenta,red);
     background-size:400% 400%;
@@ -94,14 +82,8 @@ button{
     gap:6px;
 }
 
-.apostas button{
-    background:#222;
-    color:#fff;
-}
-
-.apostas button.active{
-    outline:2px solid var(--rosa);
-}
+.apostas button{background:#222;color:#fff}
+.apostas button.active{outline:2px solid var(--rosa)}
 
 small{color:#aaa}
 .hidden{display:none}
@@ -110,7 +92,6 @@ small{color:#aaa}
 
 <body>
 
-<!-- LOGIN -->
 <div class="card" id="loginBox">
     <h2>Calculadora FF</h2>
     <input id="loginUser" placeholder="Usuário">
@@ -119,7 +100,6 @@ small{color:#aaa}
     <button class="btn" onclick="register()">Cadastrar</button>
 </div>
 
-<!-- APP -->
 <div class="card hidden" id="appBox">
     <h3 class="rgb">🔥 Calculadora FF</h3>
 
@@ -149,6 +129,17 @@ small{color:#aaa}
 </div>
 
 <script>
+/* ELEMENTOS */
+const loginBox = document.getElementById("loginBox");
+const appBox = document.getElementById("appBox");
+const loginUser = document.getElementById("loginUser");
+const loginPass = document.getElementById("loginPass");
+const saldo = document.getElementById("saldo");
+const deposito = document.getElementById("deposito");
+const historico = document.getElementById("historico");
+const estatisticas = document.getElementById("estatisticas");
+
+/* DADOS */
 const premios={1.5:2,2.5:4,3.5:6,5.5:10,10.5:20,20.5:40,50.5:100};
 let apostaAtual=null;
 let usuarioAtual=null;
@@ -165,14 +156,10 @@ function corrigirUsuario(u){
 
 /* AUTH */
 function register(){
-    const u=loginUser.value.trim();
-    const p=loginPass.value.trim();
-    if(!u||!p) return alert("Preencha tudo");
-
+    if(!loginUser.value||!loginPass.value) return alert("Preencha tudo");
     let users=getUsers();
-    if(users.find(x=>x.user===u)) return alert("Usuário já existe");
-
-    users.push(corrigirUsuario({user:u,pass:p,saldo:0}));
+    if(users.find(x=>x.user===loginUser.value)) return alert("Usuário já existe");
+    users.push(corrigirUsuario({user:loginUser.value,pass:loginPass.value,saldo:0}));
     saveUsers(users);
     alert("Cadastro realizado");
 }
@@ -180,7 +167,6 @@ function register(){
 function login(){
     let user=getUsers().find(x=>x.user===loginUser.value && x.pass===loginPass.value);
     if(!user) return alert("Usuário ou senha incorretos");
-
     usuarioAtual=corrigirUsuario(user);
     localStorage.setItem("logado",usuarioAtual.user);
     abrirApp();
@@ -199,12 +185,10 @@ function abrirApp(){
 }
 
 function apostar(v,btn){
-    if(apostaAtual!==null) return alert("Finalize a aposta atual");
+    if(apostaAtual!==null) return alert("Finalize a aposta");
     if(usuarioAtual.saldo<v) return alert("Saldo insuficiente");
-
     apostaAtual=v;
     usuarioAtual.saldo-=v;
-
     document.querySelectorAll(".apostas button").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
     atualizarTela();
@@ -232,7 +216,7 @@ function finalizar(txt){
 
 function depositar(){
     let v=parseFloat(deposito.value);
-    if(isNaN(v)||v<=0) return alert("Valor inválido");
+    if(!v||v<=0) return alert("Valor inválido");
     usuarioAtual.saldo+=v;
     usuarioAtual.stats.deposito+=v;
     usuarioAtual.hist.unshift(`💳 Depósito +${v.toFixed(2)}`);
@@ -258,13 +242,9 @@ function salvar(){
 
 function atualizarTela(){
     saldo.value="R$ "+usuarioAtual.saldo.toFixed(2);
-
-    historico.innerHTML=usuarioAtual.hist.slice(0,4)
-        .map(h=>`<small>${h}</small><br>`).join("");
-
+    historico.innerHTML=usuarioAtual.hist.slice(0,4).map(h=>`<small>${h}</small><br>`).join("");
     let s=usuarioAtual.stats;
     let lucro=s.ganho-s.perda;
-
     estatisticas.innerHTML=`
     <small>
     💳 Depositado: R$ ${s.deposito.toFixed(2)}<br>
@@ -275,13 +255,10 @@ function atualizarTela(){
 }
 
 /* AUTO LOGIN */
-let l=localStorage.getItem("logado");
+const l=localStorage.getItem("logado");
 if(l){
-    let u=getUsers().find(x=>x.user===l);
-    if(u){
-        usuarioAtual=corrigirUsuario(u);
-        abrirApp();
-    }
+    const u=getUsers().find(x=>x.user===l);
+    if(u){usuarioAtual=corrigirUsuario(u);abrirApp();}
 }
 </script>
 
